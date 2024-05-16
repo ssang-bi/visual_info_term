@@ -13,16 +13,19 @@ def onMouse(event, x, y, flags, param):
     
     if event == cv2.EVENT_LBUTTONDOWN:
         if drawing:
-            if count > 2:
-                if calcLen(x, y, ix, iy) <= 20:
-                    cv2.line(param, pt[count - 1], pt[0], color)
-                    count = -1
-                    pt.clear()
-                    drawing = False
-                else: 
-                    pt.append((x, y))
-                    cv2.circle(param, (x, y), 1, color)
-                    cv2.line(param, pt[count - 1], pt[count], color)
+            if count > 1:
+                if checkRad(pt[count - 2], pt[count - 1], (x, y)):              
+                    if calcLen(x, y, ix, iy) <= 20:
+                        cv2.line(param, pt[count - 1], pt[0], color)
+                        count = -1
+                        pt.clear()
+                        drawing = False
+                    else: 
+                        pt.append((x, y))
+                        cv2.circle(param, (x, y), 1, color)
+                        cv2.line(param, pt[count - 1], pt[count], color)
+                else:
+                    count -= 1
             else:
                 pt.append((x, y))
                 cv2.circle(param, (x, y), 1, color)
@@ -30,13 +33,11 @@ def onMouse(event, x, y, flags, param):
         else:
             ix, iy = x, y
             pt.append((ix, iy))
-            # cv2.circle(white_canvas, (centerX, centerY), r, black)
             cv2.circle(param, (ix, iy), 1, color)
             drawing = True
         
         count += 1
         print(count)
-        print(drawing)
         cv2.imshow("paint", param)
     
 def calcLen(x1, y1, x2, y2):
@@ -44,10 +45,21 @@ def calcLen(x1, y1, x2, y2):
     result = math.sqrt(pow(dx,2) + pow(dy, 2))
     return result
 
-def calcRad(x, y, count):
-    vx1, vy1 = ix - pt[count - 1][0], iy - pt[count - 1][1]
-    vx2, vy2 = x - pt[count - 1][0], y - pt[count - 1][1]
-    vx3, vy3 = x - ix, y - iy
+def checkRad(pt1, pt2, pt3):   # 좌표를 pt1, pt2, pt3 순서대로 찍히면 v1 과 v2를 외적한 값이 0이하면 180도 이상임
+    vx1, vy1 = pt1[0], pt1[1]
+    vx2, vy2 = pt2[0], pt2[1]
+    vx3, vy3 = pt3[0], pt3[1]
+    
+    v1 = (vx1 - vx2, vy1- vy2)  # 벡터 pt2 -> pt1
+    v2 = (vx3 - vx2, vy3 - vy2) # 벡터 pt2 -> pt3
+    
+    result = (v1[0] * v2[1]) - (v2[0] * v1[1])  # v1, v2 외적값
+    
+    if result > 0:      # 180도 이내
+        return True
+    else:               # 180도 이상
+        return False
+    
 
 def Brush():
     img = np.full((480, 640), 255, np.uint8)
