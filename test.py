@@ -1,40 +1,40 @@
 import numpy as np
 import cv2
 
-def keyEvent(img):
-    global mode
+drawing = False
+ix, iy = (-1, -1)
+color = (255, 0, 0)
+
+def onMouse(event, x, y, flags, param):
+    global ix, iy, drawing
     
-    key = cv2.waitKey(100)
-    if key == ord('1'):
-        cv2.destroyWindow("test")
-        if mode == "Ellipse":
-            mode = "NULL"
-        else:
-            mode = "Ellipse"
-        cv2.imshow("test",img)
-    if key == ord('2'):
-        if mode == "Polygon":
-            mode = "NULL"
-        else:
-            mode = "Polygon"
+    if event == cv2.EVENT_LBUTTONDOWN:
+        drawing = True
+        ix, iy = x, y
+    elif event == cv2.EVENT_MOUSEMOVE:
+        if drawing:
+            center = ((ix + x) // 2, (iy + y) // 2)
+            axis = ((x - ix) // 2, (y - iy) // 2)
+            cv2.ellipse(param, center, axis, 0, 0, 360, color)
+    elif event == cv2.EVENT_LBUTTONUP:
+        drawing = False
+        center = ((ix + x) // 2, (iy + y) // 2)
+        axis = ((x - ix) // 2, (y - iy) // 2)
+        cv2.ellipse(param, center, axis, 0, 0, 360, color, 2)
+        
+def Brush():
+    img = np.full((640, 480), 255, np.uint8)
+    cv2.namedWindow("paint")
+    cv2.setMouseCallback("paint", onMouse, param=img)
     
-def showMode(img):
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    color = (255, 0, 0)
-    cv2.putText(img, mode, (10, 40), font, 0.7, color, 2)
-    cv2.imshow("test",img)
-
-
-img = np.zeros((512, 512, 3), np.uint8)
-font = cv2.FONT_HERSHEY_SIMPLEX
-position = (10, 450)
-fontScale = 2
-fontColor = (255, 255, 0)
-cv2.putText(
-    img, "Hello World!", position, font, fontScale, fontColor, 3, cv2.LINE_AA, True
-)
-
-while 
-
-cv2.imshow("img", img)
-cv2.waitKey(0)
+    while True:
+        cv2.imshow("paint", img)
+        
+        key = cv2.waitKey(100)
+        if key == 27:
+            break
+        
+    cv2.destroyAllWindows()
+    
+    
+Brush()
