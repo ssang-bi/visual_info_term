@@ -1,15 +1,16 @@
 import numpy as np
 import cv2
 
-nullImg = np.full((480, 640, 3), 255, np.uint8)
-ellipseImg = np.full((480, 640, 3), 255, np.uint8)
-polygonImg = np.full((480, 640, 3), 255, np.uint8)
+nullImg = cv2.imread("input.jpg")
+nullImg = cv2.resize(nullImg, (640, 480))
+ellipseImg = nullImg.copy()
+polygonImg = nullImg.copy()
 
 cv2.putText(nullImg, "NULL", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 cv2.putText(ellipseImg, "Ellipse", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 cv2.putText(polygonImg, "Polygon", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
-def setMode(key):
+def setMode(key):   # mode(NULL, Ellipse, Polygon) 설정 키
     global mode
     
     if key == ord('1'):
