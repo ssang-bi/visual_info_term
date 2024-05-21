@@ -39,7 +39,7 @@ def drawEllipse(event, x, y, flags, param): # 수정해야함
     elif event == cv2.EVENT_MOUSEMOVE:
         if DRAWING:
             center = ((x + PT[0][0]) // 2, (y + PT[0][1]) // 2)
-            axes = ((x - PT[0][0]) // 2, (y - PT[0][1]) // 2)
+            axes = (abs((x - PT[0][0]) // 2), abs((y - PT[0][1]) // 2))
             tmpimg = param.copy()
             cv2.ellipse(tmpimg, center, axes, 0, 0, 360, COLOR, 2)
             cv2.imshow("paint", tmpimg)
@@ -127,17 +127,20 @@ COLOR = (0, 0, 0)
 VCOUNT = 0
 DRAWING = False
 
-nullImg = cv2.imread("input.jpg")
-nullImg = cv2.resize(nullImg, (640, 480))
-ellipseImg = nullImg.copy() # 이미지 파일 및 크기 자체는 NULL MODE와 같음
-polygonImg = nullImg.copy()
+
+BASE_IMG = cv2.imread("input.jpg")
+BASE_IMG = cv2.resize(BASE_IMG, (640, 480))
+
+nullImg = BASE_IMG.copy() # 이미지 파일 및 크기 자체는 NULL MODE와 같음
+ellipseImg = BASE_IMG.copy()
+polygonImg = BASE_IMG.copy()
 
 cv2.putText(nullImg, "NULL", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)     # 각각의 MODE를 좌측 상단에 출력
 cv2.putText(ellipseImg, "Ellipse", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 cv2.putText(polygonImg, "Polygon", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
     
 ACTIVE_IMG = nullImg
-    
+
 cv2.namedWindow("paint")
 cv2.setMouseCallback("paint", drawing, param=ACTIVE_IMG)
 cv2.imshow("paint", ACTIVE_IMG)
