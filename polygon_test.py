@@ -2,14 +2,12 @@ import numpy as np
 import cv2
 import math
 
-drawing = False
-ix, iy = -1, -1
 color = (0, 0, 0)
-count = 0
+Vcount = 0
 pt = list()
 imgCount = 0
 
-def polygonCapture(img, pt, imgCount):
+def polygonCapture(img, pt, imgCount):  # 폴리곤 도형 내부 이미지 캡처 후 저장
     mask = np.zeros_like(img)
     pt_array = np.array(pt)
     pt_array = pt_array.reshape((-1, 1, 2))
@@ -18,41 +16,33 @@ def polygonCapture(img, pt, imgCount):
     cv2.imwrite(f"ksb{imgCount:04d}.jpg", result)
 
 def onMouse(event, x, y, flags, param): # 최적화 필요함 
-    global ix, iy, drawing, count, pt, imgCount
+    global Vcount, pt, imgCount
     
     if event == cv2.EVENT_LBUTTONDOWN:  # 마우스 좌클릭 이벤트
-        if drawing: # polygon 그리기 시작
-            if count > 1:   # (3 + a)번쨰 점
-                if checkRad(pt[count - 2], pt[count - 1], (x, y)) and checkRad((x, y), (ix, iy), pt[1]):    # 좌표들 각도 유효한지 확인
-                    if calcLen(x, y, ix, iy) <= 20:     # 시작 좌표 랑 이전 좌표 연결
-                        cv2.line(param, pt[count - 1], pt[0], color)
-                        imgCount += 1
-                        polygonCapture(param, pt, imgCount)
-                        count = -1
-                        pt.clear()
-                        drawing = False     # polygon 완성
-                    else:       # 좌표 찍기
-                        pt.append((x, y))
-                        cv2.circle(param, (x, y), 1, color)
-                        cv2.line(param, pt[count - 1], pt[count], color)
-                else:   # 유효하지 않은 좌표
-                    count -= 1
-            else:
-                pt.append((x, y))
-                cv2.circle(param, (x, y), 1, color)
-                cv2.line(param, pt[count - 1], pt[count], color)
-        else:   # polygon 첫 좌표 찍기
-            ix, iy = x, y
-            pt.append((ix, iy))
-            cv2.circle(param, (ix, iy), 1, color)
-            drawing = True
+        if Vcount < 2:
+            pt.append((x, y))
+            cv2.circle(param, (x, y), 1, color)
+            if Vcount == 1 : cv2.line(param, pt[0], pt[1], color)
+        else:
+            if checkRad(pt[Vcount - 2], pt[Vcount - 1], (x, y)) and checkRad((x, y), pt[0], pt[1]):    # 좌표들 각도 유효한지 확인
+                if calcLen(x, y, pt[0][0], pt[0][1]) <= 20:
+                    cv2.line(param, pt[Vcount - 1], pt[0], color)
+                    imgCount += 1
+                    polygonCapture(param, pt, imgCount)
+                    Vcount = 0
+                    pt.clear()
+                else:
+                    pt.append((x, y))
+                    cv2.circle(param, (x, y), 1, color)
+                    cv2.line(param, pt[Vcount - 1], pt[Vcount], color)
+            else: Vcount -= 1
         
-        count += 1
-        print(imgCount, count)    # 테스트 용
+        Vcount += 1
+        print(imgCount, Vcount)    # 테스트 용
         print(pt)
         cv2.imshow("paint", param)
     
-def calcLen(x1, y1, x2, y2):
+def calcLen(x1, y1, x2, y2):    # 두 점 사이 거리 반환
     dx, dy = x2 - x1, y2 - y1
     result = math.sqrt(pow(dx,2) + pow(dy, 2))
     return result
@@ -74,7 +64,6 @@ def checkRad(pt1, pt2, pt3):   # 좌표를 pt1, pt2, pt3 순서대로 찍히면 
     
 
 def Brush():
-    #img = np.full((480, 640), 255, np.uint8)
     img = cv2.imread("input.jpg")
     img = cv2.resize(img, (640, 480))
     cv2.namedWindow("paint")

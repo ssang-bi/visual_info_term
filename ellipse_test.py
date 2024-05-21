@@ -8,7 +8,7 @@ ix, iy = (-1, -1)
 color = (0, 0, 0)
 count = 0
 
-def Ellipse_To_Image(image, roi_ellipse_center, roi_ellipse_axes, count) : # roi_ellipse 영역을 이미지에서 추출
+def Ellipse_To_Image(image, roi_ellipse_center, roi_ellipse_axes, count) : # 타원 내부 이미지 캡처 후 저장
     mask = np.zeros_like(image)
     cv2.ellipse(mask, roi_ellipse_center, roi_ellipse_axes, 0, 0, 360, (255, 255, 255), thickness=-1)
     result = cv2.bitwise_and(image, mask)
@@ -31,9 +31,9 @@ def onMouse(event, x, y, flags, param):
         count += 1
         drawing = False
         center = ((ix + x) // 2, (iy + y) // 2)
-        axis = (abs((ix - x) // 2), abs((iy - y) // 2))
-        cv2.ellipse(param, center, axis, 0, 0, 360, color, 2)
-        Ellipse_To_Image(param, center, axis, count)
+        axes = ((ix - x) // 2, (iy - y) // 2)
+        cv2.ellipse(param, center, axes, 0, 0, 360, color, 2)
+        Ellipse_To_Image(param, center, axes, count)
         cv2.imshow("paint", param)    
 
 def Brush():
